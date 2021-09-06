@@ -1,46 +1,136 @@
 <html>
+	<link rel="stylesheet" href="inputs.css">
 	<style>
 		container {
 			display: flex;
 			flex-direction: column;
 			font-size: 16pt;
-			font-family: 'Roboto Mono'; 
+			font-family: 'Roboto Mono';
 		}
 		left, right, top, bottom {
 			flex: 1;
 			display: flex;
 			flex-direction: row;
 		}
+		left,right {
+			flex-direction: column;
+		}
 		#input, output{
 			width: 100%;
 			padding: 1em;
 			font-size: 16pt;
 		}
-		output {
-			color: #eee;
+		shiftControl > button {
+			font-size: 24pt;
+			width: 1.5em;
+			height: 1.5em;
+			float: left;
+	    margin-top: 4.5em;
+		}
+		shift {
+			display: block;
+			float: left;
+		}
+		shift input[type=number] {
+			font-size: 16pt;
+			height: 1em;
+			width: 2.5em;
+			padding: 1em 0em;
+			text-align: center;
+			display: block;
+	    margin-left: 1.2em;
+		}
+		shift input[type=range] {
+			transform: rotate(-90deg);
+			margin: 11em -6em;
+	    width: 20em;
 		}
 	</style>
-	<script
-  src="https://code.jquery.com/jquery-3.6.0.min.js"
-  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-  crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 	<script>
-		var input, output, shifts;
-		
+		var input, output; shifts = [];
+		var alphabet = 'abcdefghijklmnopqrstuvwxyz';
+
 		$(document).ready(() => {
 			input = $('#input');
 			output = $('output');
-			shifts = $('shifts');
+
+			input.on('change keyup paste', render);
+			addShift();
+
+			$('shiftControl button.add').click(addShift);
+			$('shiftControl button.del').click(delShift);
 			render();
 		});
-		
+
 		function render() {
 			renderOut();
+			renderControls();
+			renderKey();
 		}
-		
+
 		function renderOut() {
-			for (let c of input.val().split())
-				output.append(c);
+			output.html('');
+			var val = input.val();
+
+			var i = 0;
+			for (let c of val.split('')) {
+				var shift = shifts[i % shifts.length];
+				var letter = alphabet.indexOf(c.toLowerCase());
+
+				if (letter == -1) {
+					c = c.replace(/ /g, '&nbsp;')
+					c = c.replace(/\r?\n/gi, '<br >')
+					output.append(c)
+					continue;
+				}
+
+				letter += shift;
+				letter %= alphabet.length;
+				output.append(alphabet[letter]);
+				i++;
+			}
+		}
+
+		function renderControls() {
+		}
+
+		function renderKey() {
+			var key = $('key');
+			key.html('');
+			for (let s of shifts)
+				key.append(alphabet[s % alphabet.length]);
+		}
+
+		function addShift(e) {
+			shifts.push(0)
+			var i = $('shift').length;
+			var shift = $('<shift index="'+ i +'"></shift>');
+			var slider = $('<input type="range" min=0 max=26 class="styled-slider slider-progress" />');
+			var number = $('<input type="number" min=0 max=26 />');
+			slider.val(shifts[i]);
+			number.val(shifts[i]);
+			slider.on('input', modShift);
+			number.on('input', modShift);
+			shift.append(slider);
+			shift.append(number);
+			$('shifts').append(shift)
+			render();
+		}
+		function delShift(e) {
+			var shift = $('shift')[shifts.length-1];
+			shift = $(shift);
+			shift.remove();
+			shifts.pop();
+			render();
+		}
+		function modShift(e) {
+			e = $(e.currentTarget);
+			var parent = e.parent();
+			var index = Number.parseInt(parent.attr('index'));
+			shifts[index] = Number.parseInt(e.val());
+			$('input', parent).val($(e).val())
+			render();
 		}
 	</script>
 	<h1>Polyalphabetic Substitution</h1>
@@ -56,14 +146,15 @@ ZTVGLKDBGLRUHABTUOZ</textarea>
 		</top>
 		<bottom>
 			<left>
-				<patternControl>
-					<button class="add">-</button>
+				<shiftControl>
+					<button class="del">-</button>
 					<shifts></shifts>
-					<button class="del">+</button>
-				</patternControl>
+					<button class="add">+</button>
+				</shiftControl>
 			</left>
 			<right>
-				<info></info>
+				<h3>Key</h3>
+				<key></key>
 			</right>
 		</bottom>
 	</container>
