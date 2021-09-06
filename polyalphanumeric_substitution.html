@@ -20,6 +20,14 @@
 			padding: 1em;
 			font-size: 16pt;
 		}
+		output {
+			color: black;
+			font-weight: bold;
+		}
+		output .alt {
+			color: #aaa;
+			font-weight: normal;
+		}
 		shiftControl > button {
 			font-size: 24pt;
 			width: 1.5em;
@@ -38,11 +46,11 @@
 			padding: 1em 0em;
 			text-align: center;
 			display: block;
-	    margin-left: 1.2em;
+      margin-left: 0.6em;
 		}
 		shift input[type=range] {
 			transform: rotate(-90deg);
-			margin: 11em -6em;
+	    margin: 11em -7em;
 	    width: 20em;
 		}
 	</style>
@@ -78,16 +86,19 @@
 				var shift = shifts[i % shifts.length];
 				var letter = alphabet.indexOf(c.toLowerCase());
 
+				var alt = Math.floor(i / shifts.length) % 2;
+				alt = alt ? 'class="alt"' : '';
+
 				if (letter == -1) {
 					c = c.replace(/ /g, '&nbsp;')
 					c = c.replace(/\r?\n/gi, '<br >')
-					output.append(c)
+					output.append('<span '+alt+'>' + c + '</span>');
 					continue;
 				}
 
 				letter += shift;
 				letter %= alphabet.length;
-				output.append(alphabet[letter]);
+				output.append('<span '+alt+'>' + alphabet[letter] + '</span>');
 				i++;
 			}
 		}
@@ -106,7 +117,7 @@
 			shifts.push(0)
 			var i = $('shift').length;
 			var shift = $('<shift index="'+ i +'"></shift>');
-			var slider = $('<input type="range" min=0 max=26 class="styled-slider slider-progress" />');
+			var slider = $('<input type="range" min=0 max=26 class="styled-slider slider-progress" tabindex="-1" />');
 			var number = $('<input type="number" min=0 max=26 />');
 			slider.val(shifts[i]);
 			number.val(shifts[i]);
@@ -137,8 +148,7 @@
 	<container>
 		<top>
 			<left>
-				<textarea id="input" name="input">FLASH
-ZTVGLKDBGLRUHABTUOZ</textarea>
+				<textarea id="input" name="input">JCWSVLIVLVGSJJFJCWCVL</textarea>
 			</left>
 			<right>
 				<output></output>
