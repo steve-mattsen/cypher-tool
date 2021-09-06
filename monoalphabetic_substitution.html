@@ -1,0 +1,235 @@
+<html>
+	<script
+	  src="https://code.jquery.com/jquery-3.6.0.min.js"
+	  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+	  crossorigin="anonymous"></script>
+	<style>
+		container {
+			display: flex;
+			flex-direction: column;
+			font-size: 16pt;
+			font-family: 'Roboto Mono'; 
+		}
+		left, right, top, bottom {
+			flex: 1;
+			display: flex;
+			flex-direction: row;
+		}
+		
+		#scrambled {
+			overflow: hidden;
+		}
+		message, #scrambled, letters, guide, count {
+			flex: 1;
+			word-break: break-all;
+			font-size: 16pt;
+			padding: 1em;
+		}
+		letters input, letters button {
+			width: 1.5em;
+			font-size: 16pt;
+			text-align: center;
+		}
+		letters button {
+			margin-left: 5px;
+		}
+		message, #scrambled {
+			letter-spacing: 0.25em;
+		}
+		message span {
+			display: inline-block;
+		}
+		.letterswapped, .word.found {
+			color: black;
+			font-weight: bold;
+		}
+		.letterunswapped, .word {
+			color: #ddd;
+			font-weight: 300;
+		}
+	</style>
+	<script>
+		var letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+		var guideNumbers = [
+			['e', 12.3], ['t', 9.6], ['a', 8.1], ['o', 7.9], ['n', 7.2], ['i', 7.2], ['s', 6.6],
+			['r', 6.0], ['h', 5.1], ['l', 4.0], ['d', 3.7], ['c', 3.2], ['u', 3.1], ['p', 2.3], 
+			['f', 2.3], ['m', 2.3], ['w', 2.0], ['y', 1.9], ['b', 1.6], ['g', 1.6], ['v', 0.9], 
+			['k', 0.5], ['q', 0.2], ['x', 0.2], ['j', 0.1], ['z', 0.1]
+		];
+		var counts = [];
+		var words = [
+			[],[],
+			['it', 'an', 'or', 'of', 'if', 'at', 'to', 'on', 'as', 'am', 'in', 'no', 'us', 'my', 'me', 'be', 'he', 'by', 'an', 'go',].sort(),
+			['and', 'any', 'but', 'end', 'how', 'mad', 'not', 'new', 'now', 'the', 'yet', 'one', 'our', 'who', 'saw', 'man', 'day', 'can', 'key', 'for', 'see', 'say', 'low', 'was',].sort(),
+			['that','with','have','this','will','your','from','they','know','want','been','good','much','some','time', 'head', 'each', 'hear', 'noon', 'here', 'very','were','ever','year',].sort(),
+			['there', 'where', 'which', 'their',].sort(),
+		];
+		var message = '';
+		
+		$(document).ready(() => {
+			letters.forEach((v,i,a) => {
+				var div = $('<div>');
+				var input = $('<input id="'+v+'" name="'+v+'" maxlength="3" />');
+				input.keyup(calcPage);
+				div.append('<label for="' + v + '">' + v + '</label>');
+				div.append(' ⇨ ');
+				div.append(input);
+				
+				var button = $('<button>');
+				button.html('x');
+				button.click(() => {
+					$('#' + v).val('');
+					calcPage();
+				});
+				div.append(button);
+				$('letters').append(div);
+			});
+			
+			var guide = $('guide');
+			guide.html('<h3>Guide</h3>');
+			guideNumbers.forEach((v,i,a) => {
+				var div = $('<div>');
+				div.append(v[0] + ' - ' + v[1].toFixed(1) + '%');
+				guide.append(div);
+			});
+			
+			$('#scrambled').keyup(calcPage);
+			$('#bestGuess').click(bestGuess);
+			$('#clear').click(clear);
+			
+			calcPage();
+			bestGuess();
+		})
+		
+		function calcPage() {
+			calcStats();
+			calcMessage();
+			calcWords();
+		}
+		
+		function calcMessage() {
+			var scrambled = $('#scrambled').val().split('');
+			var mes = $('message');
+			mes.html('');
+			message = '';
+			scrambled.forEach((v,i,a) => {
+				v = v.replace(/(\(|\)|\*)/g, (a,b) => '\\' + b)
+				if ("\r\n".search(v) != -1) {
+					mes.append($('<br />'));
+					return true;
+				}
+				
+				if (",./;'[]\\-=<>?:\"{}|_+ 1234567890!@#$%^&*()".search(v) != -1) {
+					v = v.replace(/\\(\(|\)|\*)/g, (a,b) => b);
+					message += ' ';
+					mes.append('<span class="letterunswapped">'+v.replace(/\ /, '&nbsp;')+'</span>');
+					return true;
+				}
+				
+				var val = $('#' + v.toLowerCase()).val();
+				if (val == "") {
+					message += ' ';
+					mes.append('<span class="letterunswapped">'+v+'</span>');
+				}
+				else {
+					message += val;
+					mes.append('<span class="letterswapped">'+val+'</span>');
+				}
+			});
+		}
+		
+		function calcStats() {
+			var scrambled = $('#scrambled').val().split('');
+			var count = $('count');
+			counts = [];
+			count.html('<h3>Letter %</h3>');
+			
+			for ( let v of letters )
+				counts[v.toLowerCase()] = 0;
+			
+			scrambled.forEach((v,i,a) => {
+				counts[v.toLowerCase()]++;
+			});
+			
+			counts = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+			
+			var total = scrambled.length;
+			
+			counts.forEach((v,i,a) => {
+				var div = $('<div>');
+				div.append('<b>' + v[0] + '</b>  - ');
+				div.append( ((v[1] / total) * 100).toFixed(1) );
+				div.append('%');
+				count.append(div);
+			});
+		}
+		
+		function calcWords() {
+			var wordGuide = $('wordGuide');
+			wordGuide.html('');
+			for (let i = 2; i <= 4; i++) {
+				wordGuide.append('<h3>' + i + '-letter words</h3>');
+				for (let w of words[i]) {
+					var found = '';
+					if (message.search(w) != -1)
+						found = 'found';
+					wordGuide.append('<span class="word ' + found + '">' + w + '</span> ');
+				}
+			}
+		}
+		
+		function bestGuess() {
+			var scrambled = $('#scrambled').val();
+			var combos = genCombos();
+			counts.forEach((v,i,a) => {
+				if (i > 8)
+					return true;
+				$('#' + v[0]).val(guideNumbers[i][0]);
+			})
+			calcPage();
+		}
+		
+		function genCombos(scrambled, guide) {
+			var combos = [];
+			// Start with the first scrambled and the first guide.
+			var pointers = [];
+			for (let i = 0; i < 10; i++)
+				pointers.push(i);
+			var result = pointers.flatMap(
+				(v,i) => pointers.slice(i+1).map( w => v + ' ' + w )
+			);
+			console.log(result);
+			return combos;
+		}
+		
+		function clear() {
+			letters.forEach((v,i,a) => {
+				$('#' + v).val('');
+			});
+			calcPage();
+		}
+	</script>
+	<h1>Monoalphabetic Substitution</h1>
+	<button id="bestGuess">Best Guess</button>
+	<button id="clear">Clear</button>
+	<container>
+		<top>
+			<left>
+				<textarea id="scrambled" name="scrambled">ajlpnyrjzjflzyasgskqgsmmejkejpfsvlpjlkkejelnnspzkynnygnsgasgyzjgakeyzygasvwnjkswskecnlujzkejzeycyzwsvoeklgahykkjazejnyjzlklguesppjlafhspzjlfsvgjrjpytloygjalzmjjkjpzuessgjplueynatyoekzlynejpkmsevgapjaksgzgltjeyzclgysnl</textarea>
+			</left>
+			<right>
+				<message></message>
+			</right>
+		</top>
+		<bottom>
+			<left>
+				<count></count>
+				<guide></guide>
+				<letters></letters>
+			</left>
+			<right>
+				<wordGuide>a</wordGuide>
+			</right>
+		</bottom>			
+	</container>
+</html>

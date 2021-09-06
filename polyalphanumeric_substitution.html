@@ -1,0 +1,70 @@
+<html>
+	<style>
+		container {
+			display: flex;
+			flex-direction: column;
+			font-size: 16pt;
+			font-family: 'Roboto Mono'; 
+		}
+		left, right, top, bottom {
+			flex: 1;
+			display: flex;
+			flex-direction: row;
+		}
+		#input, output{
+			width: 100%;
+			padding: 1em;
+			font-size: 16pt;
+		}
+		output {
+			color: #eee;
+		}
+	</style>
+	<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+	<script>
+		var input, output, shifts;
+		
+		$(document).ready(() => {
+			input = $('#input');
+			output = $('output');
+			shifts = $('shifts');
+			render();
+		});
+		
+		function render() {
+			renderOut();
+		}
+		
+		function renderOut() {
+			for (let c of input.val().split())
+				output.append(c);
+		}
+	</script>
+	<h1>Polyalphabetic Substitution</h1>
+	<container>
+		<top>
+			<left>
+				<textarea id="input" name="input">FLASH
+ZTVGLKDBGLRUHABTUOZ</textarea>
+			</left>
+			<right>
+				<output></output>
+			</right>
+		</top>
+		<bottom>
+			<left>
+				<patternControl>
+					<button class="add">-</button>
+					<shifts></shifts>
+					<button class="del">+</button>
+				</patternControl>
+			</left>
+			<right>
+				<info></info>
+			</right>
+		</bottom>
+	</container>
+</html>
