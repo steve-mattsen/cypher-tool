@@ -19,21 +19,36 @@
 			width: 100%;
 			padding: 1em;
 			font-size: 16pt;
+			height: 100%;
 		}
+
+		info {
+			display: flex;
+			flex-direction: row;
+		}
+
+		info > * {
+			flex: 1;
+		}
+
 		output {
 			color: black;
 			font-weight: bold;
 		}
 		output .alt {
-			color: #aaa;
+			color: #eee;
 			font-weight: normal;
 		}
-		shiftControl > button {
+		buttons {
+			display: block;
+			float: left;
+			padding-top: 5em;
+		}
+		buttons button {
 			font-size: 24pt;
 			width: 1.5em;
 			height: 1.5em;
-			float: left;
-	    margin-top: 4.5em;
+			display: block;
 		}
 		shift {
 			display: block;
@@ -56,8 +71,14 @@
 	</style>
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 	<script>
-		var input, output; shifts = [];
+		var input, output, message = '', shifts = [];
 		var alphabet = 'abcdefghijklmnopqrstuvwxyz';
+		var guideNumbers = [
+			['e', 12.3], ['t', 9.6], ['a', 8.1], ['o', 7.9], ['n', 7.2], ['i', 7.2], ['s', 6.6],
+			['r', 6.0], ['h', 5.1], ['l', 4.0], ['d', 3.7], ['c', 3.2], ['u', 3.1], ['p', 2.3],
+			['f', 2.3], ['m', 2.3], ['w', 2.0], ['y', 1.9], ['b', 1.6], ['g', 1.6], ['v', 0.9],
+			['k', 0.5], ['q', 0.2], ['x', 0.2], ['j', 0.1], ['z', 0.1]
+		];
 
 		$(document).ready(() => {
 			input = $('#input');
@@ -69,16 +90,20 @@
 			$('shiftControl button.add').click(addShift);
 			$('shiftControl button.del').click(delShift);
 			render();
+			renderGuide();
 		});
 
 		function render() {
 			renderOut();
 			renderControls();
 			renderKey();
+			renderInfo();
+			renderLetters();
 		}
 
 		function renderOut() {
 			output.html('');
+			message = '';
 			var val = input.val();
 
 			var i = 0;
@@ -86,7 +111,7 @@
 				var shift = shifts[i % shifts.length];
 				var letter = alphabet.indexOf(c.toLowerCase());
 
-				var alt = Math.floor(i / shifts.length) % 2;
+				var alt = shift == 0;
 				alt = alt ? 'class="alt"' : '';
 
 				if (letter == -1) {
@@ -98,6 +123,9 @@
 
 				letter += shift;
 				letter %= alphabet.length;
+
+				if (!alt)
+					message += alphabet[letter];
 				output.append('<span '+alt+'>' + alphabet[letter] + '</span>');
 				i++;
 			}
@@ -111,6 +139,29 @@
 			key.html('');
 			for (let s of shifts)
 				key.append(alphabet[s % alphabet.length]);
+		}
+
+		function renderInfo() {
+			letters = $('letters');
+			letters.html('<h3>Letters</h3>');
+		}
+
+		function renderGuide() {
+			guide = $('guide');
+			guide.html('<h3>Guide</h3>');
+			for (let [k, v] of guideNumbers) {
+				guide.append('<div>' + k + ' ' + v + '%</div>');
+			}
+		}
+
+		function renderLetters() {
+			var letters = $('letters');
+
+			var scores = scoreString(message);
+			scores.forEach((v,i,a) => {
+				var percent = ((v[1] / message.length) * 100).toFixed(1)
+				letters.append('<div>' + v[0] + ' ' + percent + '%</div>');
+			});
 		}
 
 		function addShift(e) {
@@ -143,12 +194,44 @@
 			$('input', parent).val($(e).val())
 			render();
 		}
+		function scoreString(str) {
+			var scores = []
+			for (let l in alphabet) {
+				var score = str.match(new RegExp(alphabet[l], 'gi'));
+				if (score == null)
+					continue;
+
+				score = score.length;
+
+				var letter = [];
+				letter.push(alphabet[l]);
+				letter.push(score);
+				scores.push(letter);
+			}
+			scores.sort((a,b) => b[1] - a[1]);
+			return scores;
+		}
+		function groupString(str, groupSize, index) {
+			var result = '';
+			for (let i = index; i < str.length; i += groupSize)
+				result += str[i];
+			return result;
+		}
 	</script>
 	<h1>Polyalphabetic Substitution</h1>
 	<container>
 		<top>
 			<left>
-				<textarea id="input" name="input">JCWSVLIVLVGSJJFJCWCVL</textarea>
+				<textarea id="input" name="input">LAFLUIWOYWPADUFHSNBVSWVBDZQDUF
+RBPLUYQPLWLPHZRLUEDUBSYMIPRDIJ
+HTYQUCUZYLKFRSKHZBUHULUEKPQFOY
+LYSSAMWOCWHZOLGDTDDPPOFDDTGOPY
+UDGWOYOSDRYKVVDVLAULRZYGWPLJZY
+QKYPTWVLJIAFHHSWOMUVDDAPLMJLUE
+PVLRNPDWFXWMQAFHZSEQCFAGQDFLJF
+LHLDSWCLMQLFXUBULBDUBVPVWFQHWY
+UHRHJGSOCUZZXAGFVLILQVAFDARKPQ
+LZCQAGULJBUCZAMPL</textarea>
 			</left>
 			<right>
 				<output></output>
@@ -157,14 +240,22 @@
 		<bottom>
 			<left>
 				<shiftControl>
-					<button class="del">-</button>
+					<buttons>
+						<button class="add">+</button>
+						<button class="del">-</button>
+					</buttons>
 					<shifts></shifts>
-					<button class="add">+</button>
 				</shiftControl>
 			</left>
 			<right>
 				<h3>Key</h3>
 				<key></key>
+				<info>
+					<letters></letters>
+					<guide></guide>
+					<digrams></digrams>
+					<diguide></diguide>
+				</info>
 			</right>
 		</bottom>
 	</container>
