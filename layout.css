@@ -1,0 +1,21 @@
+container {
+  display: flex;
+  flex-direction: column;
+  font-size: 16pt;
+  font-family: 'Roboto Mono';
+}
+left, right, top, bottom {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+left,right {
+  flex-direction: column;
+}
+#input, output{
+  width: 100%;
+  padding: 1em;
+  font-size: 16pt;
+  height: 100%;
+  word-break: break-all;
+}
