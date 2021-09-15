@@ -3,19 +3,8 @@
 	  src="https://code.jquery.com/jquery-3.6.0.min.js"
 	  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
 	  crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="layout.css">
 	<style>
-		container {
-			display: flex;
-			flex-direction: column;
-			font-size: 16pt;
-			font-family: 'Roboto Mono'; 
-		}
-		left, right, top, bottom {
-			flex: 1;
-			display: flex;
-			flex-direction: row;
-		}
-		
 		#scrambled {
 			overflow: hidden;
 		}
@@ -52,8 +41,8 @@
 		var letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
 		var guideNumbers = [
 			['e', 12.3], ['t', 9.6], ['a', 8.1], ['o', 7.9], ['n', 7.2], ['i', 7.2], ['s', 6.6],
-			['r', 6.0], ['h', 5.1], ['l', 4.0], ['d', 3.7], ['c', 3.2], ['u', 3.1], ['p', 2.3], 
-			['f', 2.3], ['m', 2.3], ['w', 2.0], ['y', 1.9], ['b', 1.6], ['g', 1.6], ['v', 0.9], 
+			['r', 6.0], ['h', 5.1], ['l', 4.0], ['d', 3.7], ['c', 3.2], ['u', 3.1], ['p', 2.3],
+			['f', 2.3], ['m', 2.3], ['w', 2.0], ['y', 1.9], ['b', 1.6], ['g', 1.6], ['v', 0.9],
 			['k', 0.5], ['q', 0.2], ['x', 0.2], ['j', 0.1], ['z', 0.1]
 		];
 		var counts = [];
@@ -65,7 +54,7 @@
 			['there', 'where', 'which', 'their',].sort(),
 		];
 		var message = '';
-		
+
 		$(document).ready(() => {
 			letters.forEach((v,i,a) => {
 				var div = $('<div>');
@@ -74,7 +63,7 @@
 				div.append('<label for="' + v + '">' + v + '</label>');
 				div.append(' ⇨ ');
 				div.append(input);
-				
+
 				var button = $('<button>');
 				button.html('x');
 				button.click(() => {
@@ -84,7 +73,7 @@
 				div.append(button);
 				$('letters').append(div);
 			});
-			
+
 			var guide = $('guide');
 			guide.html('<h3>Guide</h3>');
 			guideNumbers.forEach((v,i,a) => {
@@ -92,21 +81,21 @@
 				div.append(v[0] + ' - ' + v[1].toFixed(1) + '%');
 				guide.append(div);
 			});
-			
+
 			$('#scrambled').keyup(calcPage);
 			$('#bestGuess').click(bestGuess);
 			$('#clear').click(clear);
-			
+
 			calcPage();
 			bestGuess();
 		})
-		
+
 		function calcPage() {
 			calcStats();
 			calcMessage();
 			calcWords();
 		}
-		
+
 		function calcMessage() {
 			var scrambled = $('#scrambled').val().split('');
 			var mes = $('message');
@@ -118,14 +107,14 @@
 					mes.append($('<br />'));
 					return true;
 				}
-				
+
 				if (",./;'[]\\-=<>?:\"{}|_+ 1234567890!@#$%^&*()".search(v) != -1) {
 					v = v.replace(/\\(\(|\)|\*)/g, (a,b) => b);
 					message += ' ';
 					mes.append('<span class="letterunswapped">'+v.replace(/\ /, '&nbsp;')+'</span>');
 					return true;
 				}
-				
+
 				var val = $('#' + v.toLowerCase()).val();
 				if (val == "") {
 					message += ' ';
@@ -137,24 +126,24 @@
 				}
 			});
 		}
-		
+
 		function calcStats() {
 			var scrambled = $('#scrambled').val().split('');
 			var count = $('count');
 			counts = [];
 			count.html('<h3>Letter %</h3>');
-			
+
 			for ( let v of letters )
 				counts[v.toLowerCase()] = 0;
-			
+
 			scrambled.forEach((v,i,a) => {
 				counts[v.toLowerCase()]++;
 			});
-			
+
 			counts = Object.entries(counts).sort((a,b) => b[1] - a[1]);
-			
+
 			var total = scrambled.length;
-			
+
 			counts.forEach((v,i,a) => {
 				var div = $('<div>');
 				div.append('<b>' + v[0] + '</b>  - ');
@@ -163,7 +152,7 @@
 				count.append(div);
 			});
 		}
-		
+
 		function calcWords() {
 			var wordGuide = $('wordGuide');
 			wordGuide.html('');
@@ -177,7 +166,7 @@
 				}
 			}
 		}
-		
+
 		function bestGuess() {
 			var scrambled = $('#scrambled').val();
 			var combos = genCombos();
@@ -188,7 +177,7 @@
 			})
 			calcPage();
 		}
-		
+
 		function genCombos(scrambled, guide) {
 			var combos = [];
 			// Start with the first scrambled and the first guide.
@@ -201,7 +190,7 @@
 			console.log(result);
 			return combos;
 		}
-		
+
 		function clear() {
 			letters.forEach((v,i,a) => {
 				$('#' + v).val('');
@@ -230,6 +219,6 @@
 			<right>
 				<wordGuide>a</wordGuide>
 			</right>
-		</bottom>			
+		</bottom>
 	</container>
 </html>
