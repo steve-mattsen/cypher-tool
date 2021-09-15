@@ -1,0 +1,196 @@
+<html>
+  	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="layout.css" />
+    <link rel="stylesheet" href="inputs.css" />
+    <style>
+      scramblers, reflector {
+        display: block;
+        margin: 2em 0em;
+      }
+      input {
+        width: 26em;
+      }
+      plugboard letter {
+        flex: 1;
+        display: inline-block;
+        margin: 0.5em;
+      }
+      letter input {
+        width: 1.5em;
+        margin-left: 0.5em;
+      }
+    </style>
+    <script>
+      var input, output, message = '', scramblers, reflector, scramblerKey, plugboard;
+      var hooks = 'change keyup paste';
+      var alphabet = 'abcdefghijklmnopqrstuvwxyz';
+      scramblers = [
+        "uwygadfpvzbeckmthxslrinqoj",
+      ];
+      plugboard = [];
+      reflector = "yruhqsldpxngokmiebfzcwvjat";
+      scramblerKey = 'u';
+
+      $(document).ready(() => {
+        input = $('#input');
+        output = $('output');
+
+        input.on(hooks, render);
+        $('#reflector').on(hooks, (e) => {
+          reflector = $(e.currentTarget).val();
+          render();
+        }).val(reflector);
+        $('#scramblerKey').on(hooks, (e) => {
+          scramblerKey = $(e.currentTarget).val();
+          render();
+        }).val(scramblerKey);
+
+        render();
+        renderPlugboard();
+      });
+
+      function render() {
+        renderOut();
+        renderScramblers();
+        renderPlugboard();
+      }
+
+      function renderOut() {
+        output.html('');
+        message = input.val();
+
+        var key = scramblerKey;
+        key = key.split('');
+        key = key.map((e,i,a) => scramblers[i].indexOf(e.toLowerCase()));
+        for (let c of message.split('')) {
+          //Pass through the plugboard.
+          c = getPlug(c)
+          //Pass through the scramblers.
+          scramblers.forEach((v,i,a) => {
+            //Get the index of c in alphabet.
+            var ltr = alphabet.indexOf(c);
+            if (ltr == -1)
+              return true;
+            //Rotate the key first.
+            key[i] = rotateKey(key[i], 1);
+            //Get the letter at the now-matching position to c.
+            ltr = alphabet[rotateKey(ltr, key[i])]
+            //Find the letter in the disc.
+            ltr = v.indexOf(ltr)
+            //Add the current rotation.
+            ltr = rotateKey(ltr, key[i]);
+            //Look up the letter in the alphabet with the rotated key.
+            c = alphabet[ltr];
+          });
+          var letter = alphabet.indexOf(c.toLowerCase());
+          output.append('<span>' + alphabet[letter] + '</span>');
+        }
+      }
+
+      function renderScramblers() {
+        var scr = $('config scramblers');
+        scr.html('');
+        scramblers.forEach((v,i,a) => {
+            var disc = $('<input type="text" />');
+            disc.attr('scrambler', i);
+            disc.val(v);
+            disc.on(hooks, (e) => {
+              e = $(e.currentTarget);
+              scramblers[e.attr('scrambler')] = e.val();
+            });
+            scr.append(disc);
+        });
+      }
+
+      function renderPlugboard() {
+        var board = $('plugboard');
+        board.html('');
+        alphabet.split('').forEach((v, i, a) => {
+          var letter = $('<letter />');
+
+          var label = $('<label for="plug_' + v + '" >');
+          label.html(v);
+          letter.append(label);
+
+          var plughole = $('<input type="text" maxlength="1" />');
+          plughole.attr('name', 'plug_' + v);
+          plughole.attr('id', 'plug_' + v);
+          plughole.attr('plug', v);
+          plughole.val(getPlug(v) == v ? "" : getPlug(v));
+          plughole.on(hooks, (e) => {
+            e = $(e.currentTarget);
+            plug(e.attr('plug'), e.val())
+            render();
+          })
+          letter.append(plughole)
+          board.append(letter);
+        });
+      }
+
+      function plug(a,b) {
+        unplug(a);
+        unplug(b);
+        plugboard.push([a,b]);
+      }
+      function unplug(a) {
+        var result = plugboard.findIndex( e => e[0] == a || e[1] == a);
+        if (result == -1)
+          return;
+        plugboard.splice(result, 1);
+      }
+      function getPlug(a) {
+        var r = plugboard.find( e => e[0] == a || e[1] == a);
+        if (r == undefined)
+          return a;
+        return r[0] == a ? r[1] : r[0];
+      }
+
+      function rotateKey(key, rotations) {
+        return (key + rotations) % 26;
+      }
+
+      function addScrambler() {
+        scramblers.push("");
+        $('#scramblerKey').attr('maxlength', scramblers.length);
+        render();
+      }
+      function remScrambler() {
+        scramblers.pop();
+        scramblerKey = scramblerKey.substring(0, scramblers.length);
+        $('#scramblerKey')
+          .attr('maxlength', scramblers.length)
+          .val(scramblerKey);
+        render();
+      }
+    </script>
+    <h1>Enigma</h1>
+    <container>
+      <top>
+        <left>
+          <h3>Input</h3>
+          <textarea id="input">zydni</textarea>
+        </left>
+        <right>
+          <h3>Result</h3>
+          <output>Blah</output>
+        </right>
+      </top>
+      <bottom>
+        <left>
+          <config>
+            <h3>Plugboard</h3>
+            <plugboard></plugboard>
+            <h3>Scramblers</h3>
+            <scramblers></scramblers>
+            <button onclick="remScrambler()">- Scrambler</button>
+            <button onclick="addScrambler()">+ Scrambler</button>
+            <h3>Scrambler Key</h3>
+            <input type="text" maxlength="1" id="scramblerKey" />
+            <h3>Reflector</h3>
+            <input id="reflector" maxlength="26" /></input>
+          </config>
+        </left>
+        <right></right>
+      </bottom>
+    </container>
+</html>
