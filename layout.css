@@ -19,3 +19,11 @@ left,right {
   height: 100%;
   word-break: break-all;
 }
+output {
+	color: black;
+	font-weight: bold;
+}
+output .alt {
+	color: #eee;
+	font-weight: normal;
+}
