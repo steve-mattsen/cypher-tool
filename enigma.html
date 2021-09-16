@@ -20,9 +20,24 @@
         width: 1.5em;
         margin-left: 0.5em;
       }
+      info, step {
+        display: flex;
+        flex-direction: row;
+      }
+      path {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      info path:first-child {
+        flex-grow:2;
+      }
+      info path:first-child step {
+        font-weight: bold;
+      }
     </style>
     <script>
-      var input, output, message = '', scramblers, reflector, scramblerKey, plugboard;
+      var input, output, message = '', scramblers, reflector, scramblerKey, plugboard, info;
       var hooks = 'change keyup paste';
       var alphabet = 'abcdefghijklmnopqrstuvwxyz';
       scramblers = [
@@ -35,6 +50,7 @@
       $(document).ready(() => {
         input = $('#input');
         output = $('output');
+        info = $('info');
 
         input.on(hooks, render);
         $('#reflector').on(hooks, (e) => {
@@ -58,6 +74,21 @@
 
       function renderOut() {
         output.html('');
+        info.html('');
+
+        let labels = $('<path />');
+        var steps = ['Start', 'Plugboard'];
+        for (let i = 0; i < scramblers.length; i++)
+          steps.push('Scrambler ' + i);
+        steps.push('Reflector');
+        for (let i = scramblers.length; i > 0; i--)
+          steps.push('Scrambler ' + (i-1));
+        steps.push('Plugboard');
+        for (let s of steps)
+          labels.append('<step>' + s + '</step>');
+        info.append(labels);
+
+
         message = input.val();
         let scr = [];
         let ref = new Scrambler(reflector, true);
@@ -69,20 +100,40 @@
         });
 
         for (let c of message.split('')) {
+          steps = [c];
+
           //Pass through the plugboard.
           c = getPlug(c.toLowerCase())
+          steps.push(c);
+
           //Pass through the scramblers.
-          scr.forEach(v => c = v.passthrough(c));
+          scr.forEach(v => {
+            c = v.passthrough(c)
+            steps.push(c);
+          });
 
           //Pass through Reflector
           c = ref.passthrough(c);
+          steps.push(c);
 
           //Pass through scramblers in reverse.
           scr.reverse();
-          scr.forEach(v => c = v.passthrough(c));
+          scr.forEach(v => {
+            c = v.passthrough(c)
+            steps.push(c);
+          });
+          scr.reverse();
 
+          //Pass through the plugboard.
           c = getPlug(c);
+          steps.push(c);
 
+          //Display the path information we stored.
+          let path = $('<path />');
+          for (let s of steps)
+            path.append($('<step>'+s+'</step>'));
+
+          info.append(path);
           output.append('<span>' + c + '</span>');
         }
       }
@@ -195,7 +246,9 @@
             <input id="reflector" maxlength="26" /></input>
           </config>
         </left>
-        <right></right>
+        <right>
+            <info></info>
+        </right>
       </bottom>
     </container>
 </html>
