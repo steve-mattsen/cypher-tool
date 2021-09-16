@@ -76,6 +76,10 @@
 
           //Pass through Reflector
           c = ref.passthrough(c);
+
+          //Pass through scramblers in reverse.
+          scr.reverse();
+          scr.forEach(v => c = v.passthrough(c));
           output.append('<span>' + c + '</span>');
         }
       }
