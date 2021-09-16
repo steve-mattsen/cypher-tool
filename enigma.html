@@ -60,6 +60,7 @@
         output.html('');
         message = input.val();
         let scr = [];
+        let ref = new Scrambler(reflector, true);
         //Create scramblers.
         scramblers.forEach((v,i,a) => {
           let s = new Scrambler( v );
@@ -74,6 +75,9 @@
           scr.forEach((v,i,a) => {
             c = v.passthrough(c);
           });
+
+          //Pass through Reflector
+          c = ref.passthrough(c);
           output.append('<span>' + c + '</span>');
         }
       }
