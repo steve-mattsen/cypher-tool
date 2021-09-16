@@ -162,6 +162,10 @@
           .val(scramblerKey);
         render();
       }
+      function clearPlugboard() {
+        plugboard = [];
+        render();
+      }
     </script>
     <h1>Enigma</h1>
     <container>
@@ -180,6 +184,7 @@
           <config>
             <h3>Plugboard</h3>
             <plugboard></plugboard>
+            <button onclick="clearPlugboard()">Clear Plugboard</button>
             <h3>Scramblers</h3>
             <scramblers></scramblers>
             <button onclick="remScrambler()">- Scrambler</button>
