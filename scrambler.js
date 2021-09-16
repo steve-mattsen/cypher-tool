@@ -1,10 +1,11 @@
 class Scrambler {
-  constructor(letters) {
+  constructor(letters, reflector = false) {
     this.disc = [];
     letters.split('').forEach((v,i,a) => {
       this.disc.push([alphabet[i], v])
     })
     this.start = letters[0];
+    this.reflector = reflector;
   }
 
   key(letter) {
@@ -18,7 +19,8 @@ class Scrambler {
   }
 
   passthrough(letter) {
-    this.click();
+    if (!this.reflector)
+      this.click();
     return this.translate(letter);
   }
 
