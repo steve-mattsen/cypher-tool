@@ -1,5 +1,6 @@
 <html>
   	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="./scrambler.js"></script>
     <link rel="stylesheet" href="layout.css" />
     <link rel="stylesheet" href="inputs.css" />
     <style>
@@ -58,32 +59,22 @@
       function renderOut() {
         output.html('');
         message = input.val();
+        let scr = [];
+        //Create scramblers.
+        scramblers.forEach((v,i,a) => {
+          let s = new Scrambler( v );
+          s.key(scramblerKey[i]);
+          scr.push(s);
+        });
 
-        var key = scramblerKey;
-        key = key.split('');
-        key = key.map((e,i,a) => scramblers[i].indexOf(e.toLowerCase()));
         for (let c of message.split('')) {
           //Pass through the plugboard.
-          c = getPlug(c)
+          c = getPlug(c.toLowerCase())
           //Pass through the scramblers.
-          scramblers.forEach((v,i,a) => {
-            //Get the index of c in alphabet.
-            var ltr = alphabet.indexOf(c);
-            if (ltr == -1)
-              return true;
-            //Rotate the key first.
-            key[i] = rotateKey(key[i], 1);
-            //Get the letter at the now-matching position to c.
-            ltr = alphabet[rotateKey(ltr, key[i])]
-            //Find the letter in the disc.
-            ltr = v.indexOf(ltr)
-            //Add the current rotation.
-            ltr = rotateKey(ltr, key[i]);
-            //Look up the letter in the alphabet with the rotated key.
-            c = alphabet[ltr];
+          scr.forEach((v,i,a) => {
+            c = v.passthrough(c);
           });
-          var letter = alphabet.indexOf(c.toLowerCase());
-          output.append('<span>' + alphabet[letter] + '</span>');
+          output.append('<span>' + c + '</span>');
         }
       }
 
