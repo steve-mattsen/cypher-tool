@@ -14,7 +14,7 @@ left,right {
 }
 #input, output{
   width: 100%;
-  padding: 1em;
+  padding: .25em;
   font-size: 16pt;
   height: 100%;
   word-break: break-all;
