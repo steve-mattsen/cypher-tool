@@ -9,7 +9,7 @@ class Scrambler {
   }
 
   key(letter) {
-    letter = this.disc.findIndex( v => v[1] == letter );
+    letter = alphabet.indexOf(letter)
     this.click( letter );
   }
 
