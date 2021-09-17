@@ -1,5 +1,10 @@
 /*generated with Input range slider CSS style generator (version 20210711)
 https://toughengineer.github.io/demo/slider-styler*/
+
+input[type=text] {
+  padding: 0.25em;
+}
+
 input[type=range].styled-slider {
   height: 1.1em;
   -webkit-appearance: none;
@@ -26,7 +31,7 @@ input[type=range].styled-slider::-webkit-slider-thumb {
   background: #ffffff;
   cursor: pointer;
   -webkit-appearance: none;
-  margin-top: -0.8em;
+  margin-top: -0.15em;
 }
 
 input[type=range].styled-slider::-webkit-slider-runnable-track {
