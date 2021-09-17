@@ -24,10 +24,23 @@ class Scrambler {
     return this.translate(letter);
   }
 
+  passthroughReverse(letter) {
+    if (this.disc.length < 26)
+      return letter;
+    return this.translateReverse(letter);
+  }
+
   translate(letter) {
     let idx = alphabet.indexOf(letter);
     idx = this.disc[idx][0];
     idx = this.disc.findIndex(e => e[1] == idx)
+    return alphabet[idx];
+  }
+
+  translateReverse(letter) {
+    let idx = alphabet.indexOf(letter);
+    idx = this.disc[idx][1];
+    idx = this.disc.findIndex((v) => v[0] == idx);
     return alphabet[idx];
   }
 }
