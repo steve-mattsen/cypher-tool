@@ -19,8 +19,8 @@ class Scrambler {
   }
 
   passthrough(letter) {
-    if (!this.reflector)
-      this.click();
+    if (this.disc.length < 26)
+      return letter;
     return this.translate(letter);
   }
 
