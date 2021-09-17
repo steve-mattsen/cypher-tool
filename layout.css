@@ -1,6 +1,8 @@
 container {
   display: flex;
   flex-direction: column;
+}
+container, input, textarea {
   font-size: 16pt;
   font-family: 'Roboto Mono';
 }
