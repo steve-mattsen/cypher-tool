@@ -32,6 +32,8 @@ class Scrambler {
 
   translate(letter) {
     let idx = alphabet.indexOf(letter);
+    if (this.disc[idx] == undefined)
+      return letter;
     idx = this.disc[idx][0];
     idx = this.disc.findIndex(e => e[1] == idx)
     return alphabet[idx];
