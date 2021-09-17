@@ -141,7 +141,7 @@
           //Pass through scramblers in reverse.
           scr.reverse();
           scr.forEach(v => {
-            c = v.passthrough(c)
+            c = v.passthroughReverse(c)
             steps.push(c);
           });
           scr.reverse();
