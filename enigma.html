@@ -35,6 +35,28 @@
       info path:first-child step {
         font-weight: bold;
       }
+      path tooltip {
+        visibility: false;
+        opacity: 0;
+        position: absolute;
+        top: 100%;
+        right: 0%;
+        display: block;
+        background: white;
+        padding: .5em;
+      }
+      path:hover tooltip {
+        visibility: true;
+        opacity: 1;
+      }
+      tooltip scr, tooltip abc {
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.25em;
+      }
+      tooltip scr {
+        padding-bottom: 1em;
+      }
     </style>
     <script>
       var input, output, message = '', scramblers, reflector, scramblerKey, plugboard, info;
@@ -130,6 +152,22 @@
 
           //Display the path information we stored.
           let path = $('<path />');
+          let tt = $('<tooltip>')
+          scr.forEach((v,i,a) => {
+            if (v.disc.length < 26)
+              return true;
+            let tt_scr = $('<scr />')
+            let tt_abc = $('<abc />')
+            v.disc.forEach(vv => tt_abc.append(vv[0]));
+            v.disc.forEach(vv => tt_scr.append(vv[1]));
+            tt.append('<abc>' + alphabet + '</abc>');
+            tt.append(tt_abc);
+            tt.append(tt_scr);
+          })
+
+          tt.append('<abc>' + alphabet + '</abc>');
+          tt.append('<scr>' + reflector + '</scr>');
+          path.append(tt);
           for (let s of steps)
             path.append($('<step>'+s+'</step>'));
 
