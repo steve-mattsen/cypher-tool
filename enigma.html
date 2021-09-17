@@ -162,6 +162,11 @@
           //Display the path information we stored.
           let path = $('<path />');
           let tt = $('<tooltip>')
+
+          tt.append('<abc>' + alphabet + '</abc>');
+          let pb = alphabet.split('').reduce((a,b) => a + getPlug(b),'');
+          tt.append('<scr>' + pb + '</scr>');
+
           scr.forEach((v,i,a) => {
             if (v.disc.length < 26)
               return true;
